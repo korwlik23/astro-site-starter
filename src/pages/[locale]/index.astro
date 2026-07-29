@@ -1,0 +1,82 @@
+---
+import { APIRequestError, LocaleRegistryUnavailableError } from "../../api/errors";
+import { loadSiteConfig } from "../../config/site";
+import { requireAvailableLocale, LocaleNotAvailableError } from "../../i18n/availability";
+import { requireCatalogEntry, type CatalogEntries } from "../../i18n/catalog-schema";
+import type { LocaleDefinition, LocaleRegistry } from "../../i18n/locale-registry";
+import { loadCatalog } from "../../i18n/load-catalog";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getSiteRuntime } from "../../runtime/site-runtime";
+import HomeView from "../../views/HomeView.astro";
+
+export const prerender = false;
+
+interface PageData {
+  siteUrl: string;
+  locale: LocaleDefinition;
+  registry: LocaleRegistry;
+  common: CatalogEntries;
+  navigation: CatalogEntries;
+  marketing: CatalogEntries;
+  title: string;
+  description: string;
+}
+
+let page: PageData | undefined;
+let errorMessage = "";
+try {
+  const runtime = getSiteRuntime();
+  const registry = await runtime.locales.get();
+  const locale = requireAvailableLocale(registry, Astro.params.locale ?? "");
+  const [common, navigation, marketing] = await Promise.all([
+    loadCatalog(runtime.api, locale.code, "common"),
+    loadCatalog(runtime.api, locale.code, "navigation"),
+    loadCatalog(runtime.api, locale.code, "marketing"),
+  ]);
+  page = {
+    siteUrl: loadSiteConfig().public.siteUrl,
+    locale,
+    registry,
+    common,
+    navigation,
+    marketing,
+    title: requireCatalogEntry(marketing, "headline"),
+    description: requireCatalogEntry(marketing, "summary"),
+  };
+} catch (error) {
+  if (error instanceof LocaleNotAvailableError) {
+    Astro.response.status = 404;
+    errorMessage = "Not found";
+  } else if (
+    error instanceof LocaleRegistryUnavailableError ||
+    error instanceof APIRequestError
+  ) {
+    Astro.response.status = 503;
+    Astro.response.headers.set("cache-control", "no-store");
+    errorMessage = "Service unavailable";
+  } else {
+    throw error;
+  }
+}
+---
+
+{page ? (
+  <BaseLayout
+    siteUrl={page.siteUrl}
+    locale={page.locale}
+    registry={page.registry}
+    common={page.common}
+    title={page.title}
+    description={page.description}
+  >
+    <HomeView
+      locale={page.locale}
+      registry={page.registry}
+      common={page.common}
+      navigation={page.navigation}
+      marketing={page.marketing}
+    />
+  </BaseLayout>
+) : (
+  <main><h1>{errorMessage}</h1></main>
+)}

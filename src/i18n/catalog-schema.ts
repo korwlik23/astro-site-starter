@@ -20,3 +20,11 @@ export function validateCatalog(entries: unknown): CatalogEntries {
   }
   return parsed;
 }
+
+export function requireCatalogEntry(entries: CatalogEntries, key: string): string {
+  const value = entries[key];
+  if (!value) {
+    throw new Error(`Required translation is missing: ${key}`);
+  }
+  return value;
+}

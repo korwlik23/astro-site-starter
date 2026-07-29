@@ -1,0 +1,47 @@
+---
+import type { CatalogEntries } from "../i18n/catalog-schema";
+import type { LocaleDefinition, LocaleRegistry } from "../i18n/locale-registry";
+import { buildPageMetadata, serializeStructuredData } from "../seo/page-metadata";
+import "../styles/global.css";
+
+interface Props {
+  siteUrl: string;
+  locale: LocaleDefinition;
+  registry: LocaleRegistry;
+  common: CatalogEntries;
+  title: string;
+  description: string;
+}
+
+const { siteUrl, locale, registry, common, title, description } = Astro.props;
+const metadata = buildPageMetadata({ siteUrl, locale, registry, title, description });
+---
+
+<!doctype html>
+<html lang={locale.code} dir={locale.direction}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={metadata.canonical} />
+    {metadata.alternates.map((alternate) => (
+      <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />
+    ))}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={metadata.canonical} />
+    <meta property="og:locale" content={locale.code.replace("-", "_")} />
+    <title>{title} | {common.brand}</title>
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={serializeStructuredData(metadata.structuredData)}
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{common.skip_to_content}</a>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,100 @@
+---
+import type { CatalogEntries } from "../i18n/catalog-schema";
+import { enabledLocales, type LocaleDefinition, type LocaleRegistry } from "../i18n/locale-registry";
+import { localePath } from "../i18n/locale-url";
+
+interface Props {
+  locale: LocaleDefinition;
+  registry: LocaleRegistry;
+  common: CatalogEntries;
+  navigation: CatalogEntries;
+  marketing: CatalogEntries;
+}
+
+const { locale, registry, common, navigation, marketing } = Astro.props;
+const languages = enabledLocales(registry).filter((item) => item.selectable);
+---
+
+<header class="site-header">
+  <a class="brand" href={localePath(locale.code)} aria-label={common.brand}>{common.brand}</a>
+  <nav aria-label={navigation.primary_label}>
+    <a href="#features">{navigation.features}</a>
+    <a href="#architecture">{navigation.architecture}</a>
+    <a href="#faq">{navigation.faq}</a>
+  </nav>
+  <div class="language-switcher" aria-label={common.language}>
+    {languages.map((language) => (
+      <a
+        href={localePath(language.code)}
+        lang={language.code}
+        aria-current={language.code === locale.code ? "page" : undefined}
+      >
+        {language.code.toUpperCase()}
+      </a>
+    ))}
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-title">
+    <p class="eyebrow">{marketing.eyebrow}</p>
+    <h1 id="hero-title">{marketing.headline}</h1>
+    <p class="hero-summary">{marketing.summary}</p>
+    <a class="primary-action" href="#architecture">{marketing.primary_cta}</a>
+  </section>
+
+  <section id="features" class="section" aria-labelledby="features-title">
+    <div class="section-heading">
+      <p class="eyebrow">{marketing.features_eyebrow}</p>
+      <h2 id="features-title">{marketing.features_title}</h2>
+      <p>{marketing.features_summary}</p>
+    </div>
+    <div class="feature-grid">
+      <article>
+        <span aria-hidden="true">01</span>
+        <h3>{marketing.feature_api_title}</h3>
+        <p>{marketing.feature_api_body}</p>
+      </article>
+      <article>
+        <span aria-hidden="true">02</span>
+        <h3>{marketing.feature_admin_title}</h3>
+        <p>{marketing.feature_admin_body}</p>
+      </article>
+      <article>
+        <span aria-hidden="true">03</span>
+        <h3>{marketing.feature_site_title}</h3>
+        <p>{marketing.feature_site_body}</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="architecture" class="section architecture" aria-labelledby="architecture-title">
+    <div>
+      <p class="eyebrow">{marketing.architecture_eyebrow}</p>
+      <h2 id="architecture-title">{marketing.architecture_title}</h2>
+    </div>
+    <ol>
+      <li><strong>Go API</strong><span>Gin · PostgreSQL · MariaDB/MySQL</span></li>
+      <li><strong>Vue Admin</strong><span>Permission-driven back office</span></li>
+      <li><strong>Astro Site</strong><span>SSR · SEO · GEO · AEO</span></li>
+    </ol>
+  </section>
+
+  <section id="faq" class="section faq" aria-labelledby="faq-title">
+    <p class="eyebrow">FAQ</p>
+    <h2 id="faq-title">{marketing.faq_title}</h2>
+    <details open>
+      <summary>{marketing.faq_language_question}</summary>
+      <p>{marketing.faq_language_answer}</p>
+    </details>
+    <details>
+      <summary>{marketing.faq_database_question}</summary>
+      <p>{marketing.faq_database_answer}</p>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <p>{common.brand}</p>
+  <p>{marketing.footer_note}</p>
+</footer>

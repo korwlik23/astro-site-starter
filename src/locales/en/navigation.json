@@ -1,6 +1,9 @@
 {
+  "primary_label": "Primary navigation",
   "home": "Home",
   "features": "Features",
+  "architecture": "Architecture",
+  "faq": "FAQ",
   "docs": "Docs",
   "contact": "Contact"
 }
