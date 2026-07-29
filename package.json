@@ -13,6 +13,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
+    "contracts:fetch": "node scripts/contracts/fetch-openapi.mjs",
+    "contracts:fetch:local": "node scripts/contracts/fetch-openapi.mjs --local ../api",
     "lint": "eslint .",
     "test": "vitest",
     "test:run": "vitest run",
