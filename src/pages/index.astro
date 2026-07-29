@@ -1,0 +1,24 @@
+---
+import { LocaleRegistryUnavailableError } from "../api/errors";
+import { createRootRedirect } from "../i18n/root-redirect";
+import { getSiteRuntime } from "../runtime/site-runtime";
+
+export const prerender = false;
+
+let message = "";
+try {
+  const registry = await getSiteRuntime().locales.get();
+  const response = createRootRedirect(registry, Astro.request.headers);
+  Astro.response.status = response.status;
+  response.headers.forEach((value, key) => Astro.response.headers.set(key, value));
+} catch (error) {
+  if (error instanceof LocaleRegistryUnavailableError) {
+    Astro.response.status = 503;
+    Astro.response.headers.set("cache-control", "no-store");
+    message = "Service unavailable";
+  } else {
+    throw error;
+  }
+}
+---
+{message}
