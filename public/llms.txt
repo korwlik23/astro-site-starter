@@ -1,0 +1,16 @@
+# Go Lang Starter
+
+> A production-minded foundation for multilingual CMS, back-office, and future SaaS products.
+
+Go Lang Starter is a suite of independently versioned applications connected by immutable API contracts:
+
+- Go API: Gin, permission-driven authorization, runtime localization, PostgreSQL, and MariaDB/XAMPP portability.
+- Vue Admin: secure cookie sessions, accessible administration workflows, and exact permission checks.
+- Astro Site: server-rendered locale URLs, semantic HTML, canonical links, hreflang, and structured data.
+
+## Public pages
+
+- [English](https://tewarach-dev.me/en/)
+- [Thai](https://tewarach-dev.me/th/)
+
+Locale availability and translated content are resolved at runtime. The public site does not silently substitute content from a different locale when a requested locale is unavailable.
