@@ -1,6 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { parseSiteEnvironment } from "../../src/config/env";
+import { loadSiteConfig } from "../../src/config/site";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe("S2", () => {
   it("separates server settings from the public site origin", () => {
@@ -23,5 +28,12 @@ describe("S2", () => {
         PUBLIC_API_TOKEN: "must-not-leak",
       }),
     ).toThrow("PUBLIC_API_TOKEN");
+  });
+
+  it("loads server configuration from the runtime process environment", () => {
+    vi.stubEnv("SITE_API_BASE_URL", "http://127.0.0.1:8080/api/v1");
+    vi.stubEnv("PUBLIC_SITE_URL", "https://tewarach-dev.me");
+
+    expect(loadSiteConfig().server.apiBaseUrl).toBe("http://127.0.0.1:8080/api/v1");
   });
 });
