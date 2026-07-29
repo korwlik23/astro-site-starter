@@ -16,6 +16,7 @@
     "contracts:fetch": "node scripts/contracts/fetch-openapi.mjs",
     "contracts:fetch:local": "node scripts/contracts/fetch-openapi.mjs --local ../api",
     "contracts:generate": "node scripts/contracts/generate-clients.mjs",
+    "contracts:check-boundaries": "node scripts/contracts/check-client-boundaries.mjs",
     "lint": "eslint .",
     "test": "vitest",
     "test:run": "vitest run",
