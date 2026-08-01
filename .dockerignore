@@ -1,0 +1,12 @@
+.astro
+.contracts
+.git
+.github
+.env
+.env.*
+coverage
+dist
+node_modules
+playwright-report
+test-results
+*.log
