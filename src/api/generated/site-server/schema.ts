@@ -95,6 +95,7 @@ export interface components {
             id: string;
             name: string;
             selectable: boolean;
+            version?: number;
         };
         LocaleListResponse: {
             items: components["schemas"]["Locale"][];

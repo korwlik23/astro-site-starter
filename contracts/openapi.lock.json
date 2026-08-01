@@ -1,14 +1,14 @@
 {
   "repository": "https://github.com/korwlik23/go-api-starter.git",
-  "commit": "789ead73e74449301e441b55f4408967c3ac8f1a",
+  "commit": "fac3fd8bc34c5bafc781877067c95839e7874485",
   "artifacts": {
     "public": {
       "artifactPath": "openapi/dist/public.openapi.yaml",
-      "sha256": "50abcc33f02653ea22269f110b0afe1a25aac4a3768b43918561a446e92112fb"
+      "sha256": "57466bd0bde726a318d5b2db3a7734c8ba24c09e57a7b4e640b448bb026dbaea"
     },
     "siteServer": {
       "artifactPath": "openapi/dist/site-server.openapi.yaml",
-      "sha256": "f561fac1a5cd4fcf77d2b5c05127fdcb1a80490a3e3888d3d57a11da0d6e0dbd"
+      "sha256": "05aa032cf647d0390bcc5f0ddfc1018a02a9ce37dccefe14e59ac0242d7fff9f"
     }
   }
 }
