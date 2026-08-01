@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/korwlik23/go-api-starter.git",
-  "commit": "fac3fd8bc34c5bafc781877067c95839e7874485",
+  "commit": "4db2740ea16bda2c9af127db43e6afe04ad2f4eb",
   "artifacts": {
     "public": {
       "artifactPath": "openapi/dist/public.openapi.yaml",
