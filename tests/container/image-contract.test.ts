@@ -13,4 +13,12 @@ describe("C3 site image contract", () => {
     expect(dockerfile).toContain('CMD ["node", "dist/server/entry.mjs"]');
     expect(dockerfile).toContain("HEALTHCHECK");
   });
+
+  it("does not require writable filesystem session storage", () => {
+    const config = readFileSync(
+      resolve(process.cwd(), "astro.config.mjs"),
+      "utf8",
+    );
+    expect(config).toContain("sessionDrivers.lruCache");
+  });
 });

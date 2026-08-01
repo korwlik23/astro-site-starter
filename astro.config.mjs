@@ -1,11 +1,16 @@
 import node from "@astrojs/node";
-import { defineConfig } from "astro/config";
+import { defineConfig, sessionDrivers } from "astro/config";
 
 export default defineConfig({
   adapter: node({
     mode: "standalone",
   }),
   output: "server",
+  session: {
+    driver: sessionDrivers.lruCache({
+      max: 500,
+    }),
+  },
   security: {
     checkOrigin: true,
   },
