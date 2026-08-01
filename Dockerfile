@@ -5,7 +5,7 @@ RUN corepack enable && corepack prepare pnpm@11.9.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
-RUN pnpm build
+RUN pnpm build && pnpm prune --prod
 
 FROM docker.io/library/node:24.8.0-bookworm-slim@sha256:cadbfafeb6baf87eaaffa40b3640209c4b7fd38cebde65059d15bc39cd636b85
 
@@ -14,6 +14,7 @@ ENV NODE_ENV=production \
     PORT=4321
 WORKDIR /app
 COPY --from=build --chown=1000:1000 /src/dist /app/dist
+COPY --from=build --chown=1000:1000 /src/node_modules /app/node_modules
 COPY --chown=1000:1000 docker/healthcheck.mjs /app/healthcheck.mjs
 
 USER 1000:1000

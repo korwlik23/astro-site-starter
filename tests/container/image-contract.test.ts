@@ -8,6 +8,10 @@ describe("C3 site image contract", () => {
 
     expect(dockerfile.match(/^FROM .*@sha256:/gm)).toHaveLength(2);
     expect(dockerfile).toContain("pnpm install --frozen-lockfile");
+    expect(dockerfile).toContain("pnpm prune --prod");
+    expect(dockerfile).toContain(
+      "COPY --from=build --chown=1000:1000 /src/node_modules /app/node_modules",
+    );
     expect(dockerfile).toContain("USER 1000:1000");
     expect(dockerfile).toContain("EXPOSE 4321");
     expect(dockerfile).toContain('CMD ["node", "dist/server/entry.mjs"]');
