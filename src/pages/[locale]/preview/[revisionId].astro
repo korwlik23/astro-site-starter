@@ -1,0 +1,8 @@
+---
+export const prerender = false;
+Astro.response.status = 404;
+Astro.response.headers.set("cache-control", "no-store");
+Astro.response.headers.set("x-robots-tag", "noindex, nofollow");
+---
+
+<main><h1>Not found</h1></main>

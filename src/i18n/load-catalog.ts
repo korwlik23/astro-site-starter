@@ -23,6 +23,10 @@ const bundled: Record<string, Record<CatalogCategory, CatalogEntries>> = {
   th: { common: thCommon, forms: thForms, marketing: thMarketing, navigation: thNavigation },
 };
 
+export function bundledCatalog(locale: string, category: CatalogCategory): CatalogEntries {
+  return { ...englishBundle[category], ...(bundled[locale]?.[category] ?? {}) };
+}
+
 export async function loadCatalog(
   client: SiteServerAPIClient,
   locale: string,

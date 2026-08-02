@@ -1,0 +1,37 @@
+---
+import BlockRenderer from "../blocks/BlockRenderer.astro";
+import { enabledLocales } from "../i18n/locale-registry";
+import { localePath } from "../i18n/locale-url";
+import type { PublicContentProps } from "./public-content";
+
+const { content, locale, registry, common } = Astro.props as PublicContentProps;
+const languages = enabledLocales(registry).filter((item) => item.selectable);
+const languageLabel = common.language ?? "Language";
+---
+
+<header class="content-header">
+  <a class="brand" href={localePath(locale.code)}>{common.brand ?? "Go Lang Starter"}</a>
+  <div class="language-switcher" aria-label={languageLabel}>
+    {languages.map((language) => (
+      <a href={localePath(language.code, content.path)} lang={language.code} aria-current={language.code === locale.code ? "page" : undefined}>
+        {language.code.toUpperCase()}
+      </a>
+    ))}
+  </div>
+</header>
+
+<main id="main" class="content-main">
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href={localePath(locale.code)}>{common.brand ?? "Home"}</a><span aria-hidden="true">/</span><span aria-current="page">{content.title}</span></nav>
+  <article class="content-article">
+    <header class="content-title">
+      <p class="eyebrow">{content.kind === "post" ? "ARTICLE" : "PAGE"}</p>
+      <h1>{content.title}</h1>
+      {content.excerpt ? <p class="excerpt">{content.excerpt}</p> : null}
+      {content.published_at ? <time datetime={content.published_at}>{new Date(content.published_at).toLocaleDateString(locale.code)}</time> : null}
+    </header>
+    <div class="content-blocks">
+      {content.blocks.map((block) => <BlockRenderer block={block} />)}
+    </div>
+    {(content.geo.locality || content.geo.region) ? <p class="geo-signals">{[content.geo.locality, content.geo.region].filter(Boolean).join(" · ")}</p> : null}
+  </article>
+</main>

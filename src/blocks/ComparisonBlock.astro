@@ -1,0 +1,22 @@
+---
+import type { PublicBlock } from "./types";
+import { boundedText, stringArrayField, stringField } from "./types";
+
+interface Props { block: PublicBlock }
+const { block } = Astro.props;
+const title = stringField(block.data, "title");
+const rows = Array.isArray(block.data.rows) ? block.data.rows.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null && !Array.isArray(row)) : [];
+---
+
+{rows.length > 0 ? (
+  <section class="comparison-block">
+    {title ? <h2>{boundedText(title, 500)}</h2> : null}
+    <div class="comparison-grid">
+      {rows.map((row) => {
+        const label = stringField(row, "label");
+        const values = stringArrayField(row, "values");
+        return label && values.length > 0 ? <article><h3>{boundedText(label, 500)}</h3><ul>{values.map((value) => <li>{boundedText(value)}</li>)}</ul></article> : null;
+      })}
+    </div>
+  </section>
+) : null}

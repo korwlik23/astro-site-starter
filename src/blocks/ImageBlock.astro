@@ -1,0 +1,18 @@
+---
+import type { PublicBlock } from "./types";
+import { boundedText, stringField } from "./types";
+
+interface Props { block: PublicBlock }
+const { block } = Astro.props;
+const src = stringField(block.data, "src");
+const alt = stringField(block.data, "alt");
+const width = typeof block.data.width === "number" && Number.isInteger(block.data.width) && block.data.width > 0 ? block.data.width : undefined;
+const height = typeof block.data.height === "number" && Number.isInteger(block.data.height) && block.data.height > 0 ? block.data.height : undefined;
+---
+
+{src && alt && width && height ? (
+  <figure class="image-block">
+    <img src={src} alt={boundedText(alt, 500)} width={width} height={height} loading="lazy" decoding="async" />
+    {stringField(block.data, "caption") ? <figcaption>{boundedText(stringField(block.data, "caption")!, 1_000)}</figcaption> : null}
+  </figure>
+) : null}

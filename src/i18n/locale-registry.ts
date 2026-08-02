@@ -1,6 +1,7 @@
 export type TextDirection = "ltr" | "rtl";
 
 export interface LocaleDefinition {
+  id?: string;
   code: string;
   name: string;
   direction: TextDirection;

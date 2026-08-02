@@ -1,0 +1,53 @@
+---
+import { APIRequestError, LocaleRegistryUnavailableError } from "../../api/errors";
+import { bundledCatalog } from "../../i18n/load-catalog";
+import { requireAvailableLocale, LocaleNotAvailableError } from "../../i18n/availability";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { normalizePublicPath, applyPublicCacheHeaders, requestMatchesETag } from "../../cms/route-utils";
+import { getSiteRuntime } from "../../runtime/site-runtime";
+import { loadSiteConfig } from "../../config/site";
+import type { LocaleRegistry } from "../../i18n/locale-registry";
+import CmsPageView from "../../views/CmsPageView.astro";
+import ArticleView from "../../views/ArticleView.astro";
+import { buildPageMetadata } from "../../seo/page-metadata";
+
+export const prerender = false;
+
+let page: Awaited<ReturnType<typeof loadPage>> | undefined;
+let errorMessage = "";
+const runtime = getSiteRuntime();
+let registry: Awaited<ReturnType<typeof runtime.locales.get>> | undefined;
+try {
+  registry = await runtime.locales.get();
+  const locale = requireAvailableLocale(registry, Astro.params.locale ?? "");
+  page = await loadPage(locale.code, normalizePublicPath(Astro.params.slug), registry);
+  if (requestMatchesETag(Astro.request, page.loaded.etag) && page.loaded.etag !== undefined) {
+    Astro.response.status = 304;
+    Astro.response.headers.set("etag", page.loaded.etag);
+  } else {
+    applyPublicCacheHeaders(Astro.response, page.loaded.etag, page.loaded.stale);
+  }
+} catch (error) {
+  if (error instanceof LocaleNotAvailableError || error instanceof APIRequestError && error.status === 404) {
+    Astro.response.status = 404;
+    errorMessage = "Not found";
+  } else if (error instanceof LocaleRegistryUnavailableError || error instanceof APIRequestError && error.status >= 500) {
+    Astro.response.status = 503;
+    Astro.response.headers.set("cache-control", "no-store");
+    errorMessage = "Service unavailable";
+  } else {
+    throw error;
+  }
+}
+
+async function loadPage(locale: string, path: string, currentRegistry: LocaleRegistry) {
+  const loaded = await runtime.content.get(locale, path);
+  return { loaded, locale: requireAvailableLocale(currentRegistry, locale), common: bundledCatalog(locale, "common") };
+}
+---
+
+{page && registry ? (
+  <BaseLayout siteUrl={loadSiteConfig().public.siteUrl} locale={page.locale} registry={registry} common={page.common} title={page.loaded.content.seo.title || page.loaded.content.title} description={page.loaded.content.seo.description || page.loaded.content.excerpt} metadata={buildPageMetadata({ siteUrl: loadSiteConfig().public.siteUrl, locale: page.locale, registry, title: page.loaded.content.seo.title || page.loaded.content.title, description: page.loaded.content.seo.description || page.loaded.content.excerpt, content: page.loaded.content })}>
+    {page.loaded.content.kind === "post" ? <ArticleView content={page.loaded.content} locale={page.locale} registry={registry} common={page.common} /> : <CmsPageView content={page.loaded.content} locale={page.locale} registry={registry} common={page.common} />}
+  </BaseLayout>
+) : <main><h1>{errorMessage}</h1></main>}

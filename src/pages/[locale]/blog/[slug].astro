@@ -1,0 +1,55 @@
+---
+import { APIRequestError, LocaleRegistryUnavailableError } from "../../../api/errors";
+import { bundledCatalog } from "../../../i18n/load-catalog";
+import { requireAvailableLocale, LocaleNotAvailableError } from "../../../i18n/availability";
+import type { LocaleRegistry } from "../../../i18n/locale-registry";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ArticleView from "../../../views/ArticleView.astro";
+import { applyPublicCacheHeaders, requestMatchesETag } from "../../../cms/route-utils";
+import { getSiteRuntime } from "../../../runtime/site-runtime";
+import { loadSiteConfig } from "../../../config/site";
+import { buildPageMetadata } from "../../../seo/page-metadata";
+
+export const prerender = false;
+
+const runtime = getSiteRuntime();
+let registry: LocaleRegistry | undefined;
+let locale: Awaited<ReturnType<typeof requireAvailableLocale>> | undefined;
+let content: Awaited<ReturnType<typeof loadPost>> | undefined;
+let errorMessage = "";
+try {
+  registry = await runtime.locales.get();
+  locale = requireAvailableLocale(registry, Astro.params.locale ?? "");
+  content = await loadPost(locale.code, Astro.params.slug ?? "");
+  if (requestMatchesETag(Astro.request, content.etag) && content.etag !== undefined) {
+    Astro.response.status = 304;
+    Astro.response.headers.set("etag", content.etag);
+  } else {
+    applyPublicCacheHeaders(Astro.response, content.etag, false);
+  }
+} catch (error) {
+  if (error instanceof LocaleNotAvailableError || error instanceof APIRequestError && error.status === 404) {
+    Astro.response.status = 404;
+    errorMessage = "Not found";
+  } else if (error instanceof LocaleRegistryUnavailableError || error instanceof APIRequestError && error.status >= 500) {
+    Astro.response.status = 503;
+    Astro.response.headers.set("cache-control", "no-store");
+    errorMessage = "Service unavailable";
+  } else {
+    throw error;
+  }
+}
+
+async function loadPost(code: string, slug: string) {
+  if (slug.trim() === "") throw new APIRequestError("Public post was not found", 404);
+  const response = await runtime.publicApi.getPost(code, slug);
+  if (response.value === undefined) throw new APIRequestError("Public post response is empty", 502);
+  return { content: response.value, etag: response.etag };
+}
+---
+
+{content && locale && registry ? (
+  <BaseLayout siteUrl={loadSiteConfig().public.siteUrl} locale={locale} registry={registry} common={bundledCatalog(locale.code, "common")} title={content.content.seo.title || content.content.title} description={content.content.seo.description || content.content.excerpt} metadata={buildPageMetadata({ siteUrl: loadSiteConfig().public.siteUrl, locale, registry, title: content.content.seo.title || content.content.title, description: content.content.seo.description || content.content.excerpt, content: content.content })}>
+    <ArticleView content={content.content} locale={locale} registry={registry} common={bundledCatalog(locale.code, "common")} />
+  </BaseLayout>
+) : <main><h1>{errorMessage}</h1></main>}

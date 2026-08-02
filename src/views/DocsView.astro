@@ -1,0 +1,8 @@
+---
+import CmsPageView from "./CmsPageView.astro";
+import type { PublicContentProps } from "./public-content";
+
+const props = Astro.props as PublicContentProps;
+---
+
+<CmsPageView {...props} />

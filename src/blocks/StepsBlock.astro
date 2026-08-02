@@ -1,0 +1,16 @@
+---
+import type { PublicBlock } from "./types";
+import { boundedText, stringArrayField, stringField } from "./types";
+
+interface Props { block: PublicBlock }
+const { block } = Astro.props;
+const items = stringArrayField(block.data, "items");
+const title = stringField(block.data, "title");
+---
+
+{items.length > 0 ? (
+  <section class="steps-block">
+    {title ? <h2>{boundedText(title, 500)}</h2> : null}
+    <ol>{items.map((item) => <li>{boundedText(item)}</li>)}</ol>
+  </section>
+) : null}

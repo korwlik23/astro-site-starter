@@ -1,0 +1,10 @@
+---
+import type { PublicBlock } from "./types";
+import { boundedText, stringField } from "./types";
+
+interface Props { block: PublicBlock }
+const { block } = Astro.props;
+const text = stringField(block.data, "text");
+---
+
+{text ? <p class="text-block">{boundedText(text)}</p> : null}

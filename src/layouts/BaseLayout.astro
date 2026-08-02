@@ -11,10 +11,12 @@ interface Props {
   common: CatalogEntries;
   title: string;
   description: string;
+  metadata?: ReturnType<typeof buildPageMetadata>;
+  indexable?: boolean;
 }
 
-const { siteUrl, locale, registry, common, title, description } = Astro.props;
-const metadata = buildPageMetadata({ siteUrl, locale, registry, title, description });
+const { siteUrl, locale, registry, common, title, description, metadata: suppliedMetadata, indexable = true } = Astro.props;
+const metadata = suppliedMetadata ?? buildPageMetadata({ siteUrl, locale, registry, title, description });
 ---
 
 <!doctype html>
@@ -23,22 +25,22 @@ const metadata = buildPageMetadata({ siteUrl, locale, registry, title, descripti
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
-    <link rel="canonical" href={metadata.canonical} />
-    {metadata.alternates.map((alternate) => (
+    <meta name="robots" content={indexable ? "index, follow, max-image-preview:large" : "noindex, nofollow"} />
+    {indexable ? <link rel="canonical" href={metadata.canonical} /> : null}
+    {indexable ? metadata.alternates.map((alternate) => (
       <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />
-    ))}
+    )) : null}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={metadata.canonical} />
     <meta property="og:locale" content={locale.code.replace("-", "_")} />
     <title>{title} | {common.brand}</title>
-    <script
+    {indexable ? <script
       type="application/ld+json"
       is:inline
       set:html={serializeStructuredData(metadata.structuredData)}
-    />
+    /> : null}
   </head>
   <body>
     <a class="skip-link" href="#main">{common.skip_to_content}</a>

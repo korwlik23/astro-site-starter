@@ -1,0 +1,50 @@
+---
+import { APIRequestError, LocaleRegistryUnavailableError } from "../../../../api/errors";
+import { bundledCatalog } from "../../../../i18n/load-catalog";
+import { requireAvailableLocale, LocaleNotAvailableError } from "../../../../i18n/availability";
+import type { LocaleRegistry } from "../../../../i18n/locale-registry";
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import PreviewView from "../../../../views/PreviewView.astro";
+import { parsePreviewSnapshot, previewHeaders } from "../../../../cms/preview";
+import { getSiteRuntime } from "../../../../runtime/site-runtime";
+import { loadSiteConfig } from "../../../../config/site";
+
+export const prerender = false;
+
+const runtime = getSiteRuntime();
+let registry: LocaleRegistry | undefined;
+let locale: Awaited<ReturnType<typeof requireAvailableLocale>> | undefined;
+let document: Awaited<ReturnType<typeof loadPreview>> | undefined;
+let errorMessage = "";
+for (const [key, value] of previewHeaders()) Astro.response.headers.set(key, value);
+try {
+  registry = await runtime.locales.get();
+  locale = requireAvailableLocale(registry, Astro.params.locale ?? "");
+  document = await loadPreview(Astro.params.code ?? "");
+} catch (error) {
+  if (error instanceof LocaleNotAvailableError || error instanceof APIRequestError && error.status === 404) {
+    Astro.response.status = 404;
+    errorMessage = "Not found";
+  } else if (error instanceof LocaleRegistryUnavailableError || error instanceof APIRequestError && error.status >= 500) {
+    Astro.response.status = 503;
+    errorMessage = "Service unavailable";
+  } else {
+    throw error;
+  }
+}
+
+async function loadPreview(code: string) {
+  if (code.trim() === "") throw new APIRequestError("Preview was not found", 404);
+  const exchange = await runtime.publicApi.exchangePreview(code);
+  if (Date.parse(exchange.expires_at) <= Date.now()) throw new APIRequestError("Preview was not found", 404);
+  const parsed = parsePreviewSnapshot(exchange.snapshot);
+  if (!parsed) throw new APIRequestError("Preview was not found", 404);
+  return parsed;
+}
+---
+
+{document && locale && registry ? (
+  <BaseLayout indexable={false} siteUrl={loadSiteConfig().public.siteUrl} locale={locale} registry={registry} common={bundledCatalog(locale.code, "common")} title={`Preview: ${document.title}`} description={document.excerpt}>
+    <PreviewView document={document} locale={locale} registry={registry} common={bundledCatalog(locale.code, "common")} />
+  </BaseLayout>
+) : <main><h1>{errorMessage}</h1></main>}

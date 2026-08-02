@@ -1,0 +1,53 @@
+---
+import { APIRequestError, LocaleRegistryUnavailableError } from "../../../api/errors";
+import { bundledCatalog } from "../../../i18n/load-catalog";
+import { requireAvailableLocale, LocaleNotAvailableError } from "../../../i18n/availability";
+import type { LocaleRegistry } from "../../../i18n/locale-registry";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import BlogIndexView from "../../../views/BlogIndexView.astro";
+import { applyPublicCacheHeaders, requestMatchesETag } from "../../../cms/route-utils";
+import { getSiteRuntime } from "../../../runtime/site-runtime";
+import { loadSiteConfig } from "../../../config/site";
+
+export const prerender = false;
+
+const runtime = getSiteRuntime();
+let registry: LocaleRegistry | undefined;
+let locale: Awaited<ReturnType<typeof requireAvailableLocale>> | undefined;
+let posts: Awaited<ReturnType<typeof loadPosts>> | undefined;
+let errorMessage = "";
+try {
+  registry = await runtime.locales.get();
+  locale = requireAvailableLocale(registry, Astro.params.locale ?? "");
+  posts = await loadPosts(locale.code);
+  if (requestMatchesETag(Astro.request, posts.etag) && posts.etag !== undefined) {
+    Astro.response.status = 304;
+    Astro.response.headers.set("etag", posts.etag);
+  } else {
+    applyPublicCacheHeaders(Astro.response, posts.etag, false);
+  }
+} catch (error) {
+  if (error instanceof LocaleNotAvailableError || error instanceof APIRequestError && error.status === 404) {
+    Astro.response.status = 404;
+    errorMessage = "Not found";
+  } else if (error instanceof LocaleRegistryUnavailableError || error instanceof APIRequestError && error.status >= 500) {
+    Astro.response.status = 503;
+    Astro.response.headers.set("cache-control", "no-store");
+    errorMessage = "Service unavailable";
+  } else {
+    throw error;
+  }
+}
+
+async function loadPosts(code: string) {
+  const response = await runtime.publicApi.listPosts(code);
+  if (response.value === undefined) throw new APIRequestError("Public posts response is empty", 502);
+  return { posts: response.value.items, etag: response.etag };
+}
+---
+
+{posts && locale && registry ? (
+  <BaseLayout siteUrl={loadSiteConfig().public.siteUrl} locale={locale} registry={registry} common={bundledCatalog(locale.code, "common")} title="Blog" description="Published articles">
+    <BlogIndexView posts={posts.posts} locale={locale} registry={registry} common={bundledCatalog(locale.code, "common")} />
+  </BaseLayout>
+) : <main><h1>{errorMessage}</h1></main>}

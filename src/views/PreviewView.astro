@@ -1,0 +1,24 @@
+---
+import BlockRenderer from "../blocks/BlockRenderer.astro";
+import type { LocaleDefinition, LocaleRegistry } from "../i18n/locale-registry";
+import type { CatalogEntries } from "../i18n/catalog-schema";
+import type { PreviewDocument } from "../cms/preview";
+
+interface Props {
+  document: PreviewDocument;
+  locale: LocaleDefinition;
+  registry: LocaleRegistry;
+  common: CatalogEntries;
+}
+
+const { document, locale, common } = Astro.props as Props;
+---
+
+<main id="main" class="content-main preview-main">
+  <p class="preview-banner" role="status">Preview · not indexed</p>
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><a href={`/${locale.code}/`}>{common.brand ?? "Home"}</a><span aria-hidden="true">/</span><span>Preview</span></nav>
+  <article class="content-article">
+    <header class="content-title"><p class="eyebrow">{document.kind === "post" ? "ARTICLE PREVIEW" : "PAGE PREVIEW"}</p><h1>{document.title}</h1>{document.excerpt ? <p class="excerpt">{document.excerpt}</p> : null}</header>
+    <div class="content-blocks">{document.blocks.map((block) => <BlockRenderer block={block} />)}</div>
+  </article>
+</main>

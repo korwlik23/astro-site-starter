@@ -1,0 +1,19 @@
+---
+import AnswerBlock from "./AnswerBlock.astro";
+import CalloutBlock from "./CalloutBlock.astro";
+import ComparisonBlock from "./ComparisonBlock.astro";
+import ImageBlock from "./ImageBlock.astro";
+import StepsBlock from "./StepsBlock.astro";
+import TextBlock from "./TextBlock.astro";
+import type { PublicBlock } from "./types";
+
+interface Props { block: PublicBlock }
+const { block } = Astro.props;
+---
+
+{block.type === "text" ? <TextBlock block={block} /> : null}
+{block.type === "image" ? <ImageBlock block={block} /> : null}
+{block.type === "callout" ? <CalloutBlock block={block} /> : null}
+{block.type === "answer" ? <AnswerBlock block={block} /> : null}
+{block.type === "steps" ? <StepsBlock block={block} /> : null}
+{block.type === "comparison" ? <ComparisonBlock block={block} /> : null}

@@ -4,6 +4,6 @@ export function localePath(locale: string, path = "/"): string {
   if (!localeCodePattern.test(locale)) {
     throw new Error("Invalid locale code");
   }
-  const suffix = path === "/" ? "" : `/${path.replace(/^\/+|\/+$/g, "")}`;
+  const suffix = path === "/" || path === "" ? "" : `/${path.replace(/^\/+|\/+$/g, "")}`;
   return `/${locale}${suffix}/`;
 }

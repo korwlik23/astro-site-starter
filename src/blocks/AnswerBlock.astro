@@ -1,0 +1,16 @@
+---
+import type { PublicBlock } from "./types";
+import { boundedText, stringField } from "./types";
+
+interface Props { block: PublicBlock }
+const { block } = Astro.props;
+const question = stringField(block.data, "question");
+const answer = stringField(block.data, "answer");
+---
+
+{question && answer ? (
+  <section class="answer-block" aria-labelledby={`answer-${question.slice(0, 20)}`}>
+    <h2 id={`answer-${question.slice(0, 20)}`}>{boundedText(question, 500)}</h2>
+    <p>{boundedText(answer)}</p>
+  </section>
+) : null}

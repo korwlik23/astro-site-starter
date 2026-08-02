@@ -1,0 +1,32 @@
+---
+import { enabledLocales, type LocaleDefinition, type LocaleRegistry } from "../i18n/locale-registry";
+import { localePath } from "../i18n/locale-url";
+import type { CatalogEntries } from "../i18n/catalog-schema";
+import type { PublicPostItem } from "./public-content";
+
+interface Props {
+  posts: readonly PublicPostItem[];
+  locale: LocaleDefinition;
+  registry: LocaleRegistry;
+  common: CatalogEntries;
+}
+
+const { posts, locale, registry, common } = Astro.props as Props;
+const languages = enabledLocales(registry).filter((item) => item.selectable);
+---
+
+<header class="content-header">
+  <a class="brand" href={localePath(locale.code)}>{common.brand ?? "Go Lang Starter"}</a>
+  <div class="language-switcher" aria-label={common.language ?? "Language"}>
+    {languages.map((language) => <a href={localePath(language.code, "blog")} lang={language.code} aria-current={language.code === locale.code ? "page" : undefined}>{language.code.toUpperCase()}</a>)}
+  </div>
+</header>
+
+<main id="main" class="content-main">
+  <header class="content-title"><p class="eyebrow">BLOG</p><h1>Latest articles</h1><p class="excerpt">Published insights and updates.</p></header>
+  {posts.length > 0 ? (
+    <div class="post-list">
+      {posts.map((post) => <article><p class="eyebrow">{post.updated_at.slice(0, 10)}</p><h2><a href={localePath(locale.code, `blog/${post.slug}`)}>{post.title}</a></h2></article>)}
+    </div>
+  ) : <p class="empty-state">No published articles yet.</p>}
+</main>
