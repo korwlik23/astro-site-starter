@@ -55,6 +55,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/content/{locale}/{path}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve one published content translation for the public site. */
+        get: operations["getPublicContent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/menus/{locale}/{location}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve one enabled public navigation menu for a locale. */
+        get: operations["getPublicMenu"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/posts/{locale}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List published posts for one public locale. */
+        get: operations["listPublicPosts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/posts/{locale}/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Resolve one published post by locale and slug. */
+        get: operations["getPublicPost"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/previews/exchange": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Consume one preview token and return its immutable snapshot. */
+        post: operations["exchangePublicPreview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/readyz": {
         parameters: {
             query?: never;
@@ -100,6 +185,23 @@ export interface components {
         LocaleListResponse: {
             items: components["schemas"]["Locale"][];
         };
+        PreviewExchangeRequest: {
+            token: string;
+        };
+        PreviewExchangeResponse: {
+            /** Format: uuid */
+            content_id: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: uuid */
+            revision_id: string;
+            snapshot: {
+                [key: string]: unknown;
+            };
+            source_version: number;
+            /** Format: uuid */
+            translation_id: string;
+        };
         Problem: {
             /** @description Stable, machine-readable error code. */
             code: string;
@@ -108,6 +210,115 @@ export interface components {
             message: string;
             /** @description Opaque correlation identifier; never an authorization credential. */
             request_id: string;
+        };
+        PublicAEO: {
+            answer?: string;
+            question?: string;
+        };
+        PublicAlternate: {
+            /** Format: uuid */
+            locale_id: string;
+            path: string;
+            slug: string;
+            title: string;
+            /** Format: uuid */
+            translation_id: string;
+        };
+        PublicBlock: {
+            data: {
+                [key: string]: unknown;
+            };
+            /** @enum {string} */
+            type: "text" | "image" | "callout" | "answer" | "steps" | "comparison";
+        };
+        PublicContent: {
+            aeo: components["schemas"]["PublicAEO"];
+            alternates: components["schemas"]["PublicAlternate"][];
+            blocks: components["schemas"]["PublicBlock"][];
+            /** Format: uuid */
+            content_id: string;
+            content_key: string;
+            /** @enum {string} */
+            content_status: "published";
+            content_version: number;
+            excerpt: string;
+            geo: components["schemas"]["PublicGEO"];
+            /** @enum {string} */
+            kind: "page" | "post";
+            /** Format: uuid */
+            locale_id: string;
+            path: string;
+            /** Format: date-time */
+            published_at?: string;
+            seo: components["schemas"]["PublicSEO"];
+            slug: string;
+            title: string;
+            /** Format: uuid */
+            translation_id: string;
+            /** @enum {string} */
+            translation_status: "published";
+            translation_version: number;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PublicGEO: {
+            locality?: string;
+            region?: string;
+        };
+        PublicMenu: {
+            /** Format: uuid */
+            id: string;
+            items: components["schemas"]["PublicMenuItem"][];
+            key: string;
+            /** Format: uuid */
+            locale_id: string;
+            name: string;
+            version: number;
+        };
+        PublicMenuItem: {
+            children?: components["schemas"]["PublicMenuItem"][];
+            /** Format: uuid */
+            id: string;
+            label: string;
+            /** Format: uuid */
+            parent_id?: string;
+            position: number;
+            target: string;
+            /** @enum {string} */
+            target_kind: "internal_path" | "external_url" | "content_key";
+        };
+        PublicPostCursor: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PublicPostItem: {
+            /** Format: uuid */
+            content_id: string;
+            /** Format: uuid */
+            locale_id: string;
+            path: string;
+            slug: string;
+            title: string;
+            /** Format: uuid */
+            translation_id: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PublicPostListResponse: {
+            items: components["schemas"]["PublicPostItem"][];
+            next?: components["schemas"]["PublicPostCursor"];
+        };
+        PublicSEO: {
+            /** Format: uri-reference */
+            canonical_url?: string;
+            description: string;
+            robots?: string;
+            structured_data?: {
+                [key: string]: unknown;
+            };
+            title: string;
         };
         ReadinessResponse: {
             /** @enum {string} */
@@ -127,6 +338,24 @@ export interface components {
         };
     };
     responses: {
+        /** @description The request could not be processed. */
+        BadRequest: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        /** @description An unexpected error prevented completion of the request. */
+        InternalServerError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
         /** @description The requested resource is not available. */
         NotFound: {
             headers: {
@@ -218,6 +447,182 @@ export interface operations {
             };
             404: components["responses"]["NotFound"];
             429: components["responses"]["TooManyRequests"];
+        };
+    };
+    getPublicContent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                locale: string;
+                /** @description Normalized public content path without the locale prefix. */
+                path: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The published content translation and its published alternate locales. */
+            200: {
+                headers: {
+                    "Cache-Control"?: string;
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicContent"];
+                };
+            };
+            /** @description The published content has not changed. */
+            304: {
+                headers: {
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getPublicMenu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                locale: string;
+                location: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Enabled menu with enabled items only. */
+            200: {
+                headers: {
+                    "Cache-Control"?: string;
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicMenu"];
+                };
+            };
+            /** @description The public menu has not changed. */
+            304: {
+                headers: {
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    listPublicPosts: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                locale: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Published posts ordered by the public content cursor. */
+            200: {
+                headers: {
+                    "Cache-Control"?: string;
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicPostListResponse"];
+                };
+            };
+            /** @description The published post list has not changed. */
+            304: {
+                headers: {
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    getPublicPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                locale: string;
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The published post. */
+            200: {
+                headers: {
+                    "Cache-Control"?: string;
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicContent"];
+                };
+            };
+            /** @description The published post has not changed. */
+            304: {
+                headers: {
+                    ETag?: string;
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalServerError"];
+        };
+    };
+    exchangePublicPreview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewExchangeRequest"];
+            };
+        };
+        responses: {
+            /** @description One-time preview payload; never cache or index this response. */
+            200: {
+                headers: {
+                    "Cache-Control"?: "no-store";
+                    "X-Robots-Tag"?: "noindex, nofollow";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviewExchangeResponse"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+            500: components["responses"]["InternalServerError"];
         };
     };
     getReadiness: {

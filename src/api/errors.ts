@@ -16,3 +16,14 @@ export class LocaleRegistryUnavailableError extends Error {
     this.name = "LocaleRegistryUnavailableError";
   }
 }
+
+export class PublicContentUnavailableError extends Error {
+  readonly status = 503;
+  override readonly cause?: unknown;
+
+  constructor(cause?: unknown) {
+    super("Public content is temporarily unavailable");
+    this.name = "PublicContentUnavailableError";
+    this.cause = cause;
+  }
+}
