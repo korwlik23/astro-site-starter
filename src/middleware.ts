@@ -4,7 +4,14 @@ import { LocaleRegistryUnavailableError } from "./api/errors";
 import { requireAvailableLocale, LocaleNotAvailableError } from "./i18n/availability";
 import { getSiteRuntime } from "./runtime/site-runtime";
 
-const unlocalizedPaths = new Set(["", "healthz"]);
+const unlocalizedPaths = new Set([
+  "",
+  "healthz",
+  "robots.txt",
+  "rss",
+  "sitemap",
+  "sitemap-index.xml",
+]);
 
 export const onRequest = defineMiddleware(async ({ url }, next) => {
   const firstSegment = url.pathname.split("/").filter(Boolean)[0] ?? "";
