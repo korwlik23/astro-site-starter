@@ -1,0 +1,13 @@
+---
+import { requireCatalogEntry, type CatalogEntries } from "../../i18n/catalog-schema";
+
+interface Props { common: CatalogEntries }
+const { common } = Astro.props;
+const brand = requireCatalogEntry(common, "brand");
+const note = requireCatalogEntry(common, "footer_note");
+---
+
+<footer class="site-footer">
+  <p>{brand}</p>
+  <p>{note}</p>
+</footer>

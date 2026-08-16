@@ -1,0 +1,35 @@
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+body {
+  min-width: 20rem;
+  margin: 0;
+  color: var(--color-text);
+  background: var(--color-canvas);
+  font-family: var(--font-sans);
+  line-height: var(--line-normal);
+}
+img { max-width: 100%; height: auto; }
+a { color: inherit; text-underline-offset: var(--space-1); }
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.skip-link {
+  position: fixed;
+  inset-block-start: var(--space-4);
+  inset-inline-start: var(--space-4);
+  z-index: 100;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-inverse);
+  background: var(--color-action);
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: translateY(0); }
+[dir="rtl"] { text-align: start; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

@@ -1,0 +1,62 @@
+---
+import { requireCatalogEntry, type CatalogEntries } from "../../i18n/catalog-schema";
+import type { LocaleDefinition, LocaleRegistry } from "../../i18n/locale-registry";
+import { localePath } from "../../i18n/locale-url";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import PrimaryNavigation from "./PrimaryNavigation.astro";
+import {
+  buildPrimaryNavigation,
+  type NavigationCatalog,
+} from "./navigation-model";
+
+interface Props {
+  locale: LocaleDefinition;
+  registry: LocaleRegistry;
+  common: CatalogEntries;
+  navigation: CatalogEntries;
+  currentPath: string;
+}
+
+const { locale, registry, common, navigation, currentPath } = Astro.props;
+const navigationCatalog = navigation as unknown as NavigationCatalog;
+const items = buildPrimaryNavigation(locale.code, navigationCatalog);
+const brand = requireCatalogEntry(common, "brand");
+const languageLabel = requireCatalogEntry(common, "language");
+const menuLabel = requireCatalogEntry(common, "menu");
+---
+
+<header class="site-header">
+  <a class="brand" href={localePath(locale.code)} aria-label={brand}>
+    {brand}
+  </a>
+  <PrimaryNavigation
+    class="desktop-navigation"
+    label={navigationCatalog.primary_label}
+    items={items}
+  />
+  <LanguageSwitcher
+    locale={locale}
+    registry={registry}
+    label={languageLabel}
+    currentPath={currentPath}
+  />
+  <details class="mobile-navigation" data-mobile-navigation>
+    <summary>{menuLabel}</summary>
+    <PrimaryNavigation label={navigationCatalog.primary_label} items={items} />
+  </details>
+</header>
+
+<script>
+  for (const element of document.querySelectorAll("[data-mobile-navigation]")) {
+    if (!(element instanceof HTMLDetailsElement)) continue;
+    const summary = element.querySelector("summary");
+    element.addEventListener("click", (event) => {
+      if ((event.target as Element).closest("a")) element.open = false;
+    });
+    element.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || !element.open) return;
+      element.open = false;
+      summary?.focus();
+    });
+  }
+</script>

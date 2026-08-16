@@ -5,7 +5,7 @@ import { requireAvailableLocale, LocaleNotAvailableError } from "../../i18n/avai
 import { requireCatalogEntry, type CatalogEntries } from "../../i18n/catalog-schema";
 import type { LocaleDefinition, LocaleRegistry } from "../../i18n/locale-registry";
 import { loadCatalog } from "../../i18n/load-catalog";
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteLayout from "../../layouts/SiteLayout.astro";
 import { getSiteRuntime } from "../../runtime/site-runtime";
 import HomeView from "../../views/HomeView.astro";
 
@@ -61,22 +61,20 @@ try {
 ---
 
 {page ? (
-  <BaseLayout
+  <SiteLayout
     siteUrl={page.siteUrl}
     locale={page.locale}
     registry={page.registry}
     common={page.common}
     title={page.title}
     description={page.description}
+    navigation={page.navigation}
+    currentPath=""
   >
     <HomeView
-      locale={page.locale}
-      registry={page.registry}
-      common={page.common}
-      navigation={page.navigation}
       marketing={page.marketing}
     />
-  </BaseLayout>
+  </SiteLayout>
 ) : (
   <main><h1>{errorMessage}</h1></main>
 )}

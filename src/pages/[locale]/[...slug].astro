@@ -3,6 +3,7 @@ import { APIRequestError, LocaleRegistryUnavailableError } from "../../api/error
 import { bundledCatalog } from "../../i18n/load-catalog";
 import { requireAvailableLocale, LocaleNotAvailableError } from "../../i18n/availability";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import SiteLayout from "../../layouts/SiteLayout.astro";
 import { normalizePublicPath, applyPublicCacheHeaders, requestMatchesETag } from "../../cms/route-utils";
 import { getSiteRuntime } from "../../runtime/site-runtime";
 import { loadSiteConfig } from "../../config/site";
@@ -22,8 +23,7 @@ try {
   const locale = requireAvailableLocale(registry, Astro.params.locale ?? "");
   page = await loadPage(locale.code, normalizePublicPath(Astro.params.slug), registry);
   if (requestMatchesETag(Astro.request, page.loaded.etag) && page.loaded.etag !== undefined) {
-    Astro.response.status = 304;
-    Astro.response.headers.set("etag", page.loaded.etag);
+    return new Response(null, { status: 304, headers: { etag: page.loaded.etag } });
   } else {
     applyPublicCacheHeaders(Astro.response, page.loaded.etag, page.loaded.stale);
   }
@@ -42,12 +42,38 @@ try {
 
 async function loadPage(locale: string, path: string, currentRegistry: LocaleRegistry) {
   const loaded = await runtime.content.get(locale, path);
-  return { loaded, locale: requireAvailableLocale(currentRegistry, locale), common: bundledCatalog(locale, "common") };
+  return {
+    loaded,
+    locale: requireAvailableLocale(currentRegistry, locale),
+    common: bundledCatalog(locale, "common"),
+    navigation: bundledCatalog(locale, "navigation"),
+  };
 }
 ---
 
-{page && registry ? (
+{page && registry ? page.loaded.content.kind === "page" ? (
+  <SiteLayout
+    siteUrl={loadSiteConfig().public.siteUrl}
+    locale={page.locale}
+    registry={registry}
+    common={page.common}
+    navigation={page.navigation}
+    currentPath={page.loaded.content.path}
+    title={page.loaded.content.seo.title || page.loaded.content.title}
+    description={page.loaded.content.seo.description || page.loaded.content.excerpt}
+    metadata={buildPageMetadata({
+      siteUrl: loadSiteConfig().public.siteUrl,
+      locale: page.locale,
+      registry,
+      title: page.loaded.content.seo.title || page.loaded.content.title,
+      description: page.loaded.content.seo.description || page.loaded.content.excerpt,
+      content: page.loaded.content,
+    })}
+  >
+    <CmsPageView content={page.loaded.content} locale={page.locale} registry={registry} common={page.common} />
+  </SiteLayout>
+) : (
   <BaseLayout siteUrl={loadSiteConfig().public.siteUrl} locale={page.locale} registry={registry} common={page.common} title={page.loaded.content.seo.title || page.loaded.content.title} description={page.loaded.content.seo.description || page.loaded.content.excerpt} metadata={buildPageMetadata({ siteUrl: loadSiteConfig().public.siteUrl, locale: page.locale, registry, title: page.loaded.content.seo.title || page.loaded.content.title, description: page.loaded.content.seo.description || page.loaded.content.excerpt, content: page.loaded.content })}>
-    {page.loaded.content.kind === "post" ? <ArticleView content={page.loaded.content} locale={page.locale} registry={registry} common={page.common} /> : <CmsPageView content={page.loaded.content} locale={page.locale} registry={registry} common={page.common} />}
+    <ArticleView content={page.loaded.content} locale={page.locale} registry={registry} common={page.common} />
   </BaseLayout>
 ) : <main><h1>{errorMessage}</h1></main>}

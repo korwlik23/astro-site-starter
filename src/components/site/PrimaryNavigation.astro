@@ -1,0 +1,19 @@
+---
+import type { NavigationItem } from "./navigation-model";
+
+interface Props {
+  label: string;
+  items: readonly NavigationItem[];
+  class?: string;
+}
+
+const { label, items, class: className } = Astro.props;
+---
+
+<nav class={className} aria-label={label}>
+  <ul>
+    {items.map((item) => (
+      <li><a href={item.href}>{item.label}</a></li>
+    ))}
+  </ul>
+</nav>

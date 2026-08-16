@@ -1,41 +1,14 @@
 ---
 import type { CatalogEntries } from "../i18n/catalog-schema";
-import { enabledLocales, type LocaleDefinition, type LocaleRegistry } from "../i18n/locale-registry";
-import { localePath } from "../i18n/locale-url";
 
 interface Props {
-  locale: LocaleDefinition;
-  registry: LocaleRegistry;
-  common: CatalogEntries;
-  navigation: CatalogEntries;
   marketing: CatalogEntries;
 }
 
-const { locale, registry, common, navigation, marketing } = Astro.props;
-const languages = enabledLocales(registry).filter((item) => item.selectable);
+const { marketing } = Astro.props;
 ---
 
-<header class="site-header">
-  <a class="brand" href={localePath(locale.code)} aria-label={common.brand}>{common.brand}</a>
-  <nav aria-label={navigation.primary_label}>
-    <a href="#features">{navigation.features}</a>
-    <a href="#architecture">{navigation.architecture}</a>
-    <a href="#faq">{navigation.faq}</a>
-  </nav>
-  <div class="language-switcher" aria-label={common.language}>
-    {languages.map((language) => (
-      <a
-        href={localePath(language.code)}
-        lang={language.code}
-        aria-current={language.code === locale.code ? "page" : undefined}
-      >
-        {language.code.toUpperCase()}
-      </a>
-    ))}
-  </div>
-</header>
-
-<main id="main">
+<div class="home-view">
   <section class="hero" aria-labelledby="hero-title">
     <p class="eyebrow">{marketing.eyebrow}</p>
     <h1 id="hero-title">{marketing.headline}</h1>
@@ -74,14 +47,14 @@ const languages = enabledLocales(registry).filter((item) => item.selectable);
       <h2 id="architecture-title">{marketing.architecture_title}</h2>
     </div>
     <ol>
-      <li><strong>Go API</strong><span>Gin · PostgreSQL · MariaDB/MySQL</span></li>
-      <li><strong>Vue Admin</strong><span>Permission-driven back office</span></li>
-      <li><strong>Astro Site</strong><span>SSR · SEO · GEO · AEO</span></li>
+      <li><strong>{marketing.architecture_api_title}</strong><span>{marketing.architecture_api_body}</span></li>
+      <li><strong>{marketing.architecture_admin_title}</strong><span>{marketing.architecture_admin_body}</span></li>
+      <li><strong>{marketing.architecture_site_title}</strong><span>{marketing.architecture_site_body}</span></li>
     </ol>
   </section>
 
   <section id="faq" class="section faq" aria-labelledby="faq-title">
-    <p class="eyebrow">FAQ</p>
+    <p class="eyebrow">{marketing.faq_eyebrow}</p>
     <h2 id="faq-title">{marketing.faq_title}</h2>
     <details open>
       <summary>{marketing.faq_language_question}</summary>
@@ -92,9 +65,4 @@ const languages = enabledLocales(registry).filter((item) => item.selectable);
       <p>{marketing.faq_database_answer}</p>
     </details>
   </section>
-</main>
-
-<footer>
-  <p>{common.brand}</p>
-  <p>{marketing.footer_note}</p>
-</footer>
+</div>

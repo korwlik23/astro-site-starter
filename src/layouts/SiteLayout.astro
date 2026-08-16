@@ -1,0 +1,57 @@
+---
+import type { CatalogEntries } from "../i18n/catalog-schema";
+import type { LocaleDefinition, LocaleRegistry } from "../i18n/locale-registry";
+import type { buildPageMetadata } from "../seo/page-metadata";
+import SiteFooter from "../components/site/SiteFooter.astro";
+import SiteHeader from "../components/site/SiteHeader.astro";
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  siteUrl: string;
+  locale: LocaleDefinition;
+  registry: LocaleRegistry;
+  common: CatalogEntries;
+  navigation: CatalogEntries;
+  currentPath: string;
+  title: string;
+  description: string;
+  metadata?: ReturnType<typeof buildPageMetadata>;
+  indexable?: boolean;
+}
+
+const {
+  siteUrl,
+  locale,
+  registry,
+  common,
+  navigation,
+  currentPath,
+  title,
+  description,
+  metadata,
+  indexable = true,
+} = Astro.props;
+---
+
+<BaseLayout
+  siteUrl={siteUrl}
+  locale={locale}
+  registry={registry}
+  common={common}
+  title={title}
+  description={description}
+  indexable={indexable}
+  {...(metadata === undefined ? {} : { metadata })}
+>
+  <SiteHeader
+    locale={locale}
+    registry={registry}
+    common={common}
+    navigation={navigation}
+    currentPath={currentPath}
+  />
+  <main id="main">
+    <slot />
+  </main>
+  <SiteFooter common={common} />
+</BaseLayout>

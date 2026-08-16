@@ -1,5 +1,9 @@
 {
   "brand": "Go Lang Starter",
   "language": "Language",
+  "menu": "Menu",
+  "home": "Home",
+  "breadcrumbs_label": "Breadcrumbs",
+  "footer_note": "Built to grow with your product.",
   "skip_to_content": "Skip to content"
 }

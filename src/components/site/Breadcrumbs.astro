@@ -1,0 +1,20 @@
+---
+import { requireCatalogEntry, type CatalogEntries } from "../../i18n/catalog-schema";
+import type { LocaleDefinition } from "../../i18n/locale-registry";
+import { localePath } from "../../i18n/locale-url";
+
+interface Props {
+  locale: LocaleDefinition;
+  common: CatalogEntries;
+  title: string;
+}
+const { locale, common, title } = Astro.props;
+---
+
+<nav class="breadcrumbs" aria-label={requireCatalogEntry(common, "breadcrumbs_label")}>
+  <ol>
+    <li><a href={localePath(locale.code)}>{requireCatalogEntry(common, "home")}</a></li>
+    <li aria-hidden="true">/</li>
+    <li aria-current="page">{title}</li>
+  </ol>
+</nav>

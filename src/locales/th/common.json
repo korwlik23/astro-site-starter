@@ -1,5 +1,9 @@
 {
   "brand": "Go Lang Starter",
   "language": "ภาษา",
+  "menu": "เมนู",
+  "home": "หน้าแรก",
+  "breadcrumbs_label": "เส้นทางนำทาง",
+  "footer_note": "สร้างขึ้นเพื่อการต่อยอดผลิตภัณฑ์ของคุณ",
   "skip_to_content": "ข้ามไปยังเนื้อหา"
 }

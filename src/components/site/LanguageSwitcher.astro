@@ -1,0 +1,30 @@
+---
+import { enabledLocales, type LocaleDefinition, type LocaleRegistry } from "../../i18n/locale-registry";
+import { languagePath } from "./navigation-model";
+
+interface Props {
+  locale: LocaleDefinition;
+  registry: LocaleRegistry;
+  label: string;
+  currentPath: string;
+}
+
+const { locale, registry, label, currentPath } = Astro.props;
+const languages = enabledLocales(registry).filter((item) => item.selectable);
+---
+
+<nav class="language-switcher" aria-label={label}>
+  <ul>
+    {languages.map((language) => (
+      <li>
+        <a
+          href={languagePath(language.code, currentPath)}
+          lang={language.code}
+          aria-current={language.code === locale.code ? "page" : undefined}
+        >
+          {language.code.toUpperCase()}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

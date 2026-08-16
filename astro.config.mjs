@@ -5,6 +5,9 @@ export default defineConfig({
   adapter: node({
     mode: "standalone",
   }),
+  devToolbar: {
+    enabled: false,
+  },
   output: "server",
   session: {
     driver: sessionDrivers.lruCache({
